@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+langgraph
+langchain
+pydantic
+python-dotenv
+streamlit
+pytest
+requests

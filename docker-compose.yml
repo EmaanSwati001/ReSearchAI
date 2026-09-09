@@ -1,0 +1,27 @@
+# docker-compose.yml
+
+version: "3.8"
+
+services:
+  backend:
+    build: .
+    command: uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - .:/app
+    depends_on: []
+
+  frontend:
+    build: .
+    command: streamlit run frontend/app.py --server.port 8501 --server.headless true
+    ports:
+      - "8501:8501"
+    environment:
+      - STREAMLIT_SERVER_PORT=8501
+    volumes:
+      - .:/app
+    depends_on:
+      - backend
