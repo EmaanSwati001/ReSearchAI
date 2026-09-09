@@ -29,6 +29,6 @@ def test_research_endpoint_schema():
     response = client.post("/research", json=payload)
     assert response.status_code == 200
     data = response.json()
-    # The placeholder response should contain at least a status field.
+    # The response should contain a status field.
     assert "status" in data
-    assert data["status"] == "pending"
+    assert data["status"] == "success"

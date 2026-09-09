@@ -14,8 +14,8 @@ def test_graph_construction_and_execution():
         "user_interest": "machine learning",
     }
     result = graph.invoke(init_state)
-    # The placeholder final state should contain a status field.
+    # The final state should contain a status field.
     assert isinstance(result, dict)
-    assert result.get("status") == "pending"
+    assert result.get("status") == "success"
     # Ensure no errors key present (optional).
     assert "errors" not in result or result["errors"] is None
