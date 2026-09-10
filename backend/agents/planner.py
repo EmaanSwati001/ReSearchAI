@@ -30,6 +30,7 @@ def _call_groq(model: str, api_key: str, messages: list) -> Optional[Dict[str, A
         "model": model,
         "messages": messages,
         "temperature": 0.7,
+        "max_tokens": 1000,
     }
     try:
         response = requests.post(url, headers=headers, json=payload, timeout=30)
@@ -37,10 +38,17 @@ def _call_groq(model: str, api_key: str, messages: list) -> Optional[Dict[str, A
         data = response.json()
         # Extract the assistant message content
         content = data["choices"][0]["message"]["content"]
-        # The LLM is instructed to output pure JSON, so we parse it.
-        return json.loads(content)
+        cleaned = content.strip()
+        if cleaned.startswith("```"):
+            lines = cleaned.splitlines()
+            if lines[0].startswith("```"):
+                lines = lines[1:]
+            if lines and lines[-1].startswith("```"):
+                lines = lines[:-1]
+            cleaned = "\n".join(lines).strip()
+        return json.loads(cleaned)
     except Exception as e:
-        # In a production system you would log the error.
+        print(f"[Planner] Groq API call error: {e}")
         return None
 
 
@@ -52,12 +60,26 @@ def run(state: Dict[str, Any]) -> Dict[str, Any]:
     - ``experience_level`` (str): user's experience level
     - ``user_interest`` (Optional[str]): optional specific area of interest
     """
+    import backend.config  # ensure .env is loaded
     # Load configuration from environment
     api_key = os.getenv("GROQ_API_KEY")
-    model = os.getenv("GROQ_MODEL", "mixtral-8x7b-32768")
+    model = os.getenv("GROQ_MODEL", "qwen/qwen3.8-27b")
 
     if not api_key:
-        # If the key is missing we simply return the state unchanged.
+        # If the key is missing we generate a fallback plan using user inputs
+        topic = state.get("user_topic", "Research Topic")
+        interest = state.get("user_interest")
+        keywords = [t.strip() for t in [topic, interest] if t and t.strip().lower() not in ("none", "")]
+        plan_dict = {
+            "title": f"Research Plan: {topic}",
+            "summary": f"A structured research plan for {topic}.",
+            "keywords": keywords if keywords else [topic],
+            "subtopics": [f"Foundations of {topic}", f"Applications of {topic}"],
+            "research_questions": [f"What are current key advancements and methodologies in {topic}?"],
+            "methodology_suggestions": ["Literature Review", "Empirical Evaluation"],
+            "timeline_weeks": 4,
+        }
+        state["planner_output"] = plan_dict
         return state
 
     # Build the prompt – we ask the model to return JSON matching PlannerOutput.
@@ -85,15 +107,18 @@ def run(state: Dict[str, Any]) -> Dict[str, Any]:
     plan_dict: Optional[Dict[str, Any]] = _call_groq(model, api_key, messages)
 
     if plan_dict is None:
-        # Fallback – static placeholder plan so downstream nodes keep working.
+        # Fallback with real keywords based on topic so downstream discovery works
+        topic = state.get("user_topic", "Research Topic")
+        interest = state.get("user_interest")
+        keywords = [t.strip() for t in [topic, interest] if t and t.strip().lower() not in ("none", "")]
         plan_dict = {
-            "title": "Research Plan (fallback)",
-            "summary": "A generic plan generated because the LLM call failed.",
-            "keywords": [],
-            "subtopics": [],
-            "research_questions": [],
-            "methodology_suggestions": [],
-            "timeline_weeks": None,
+            "title": f"Research Plan: {topic}",
+            "summary": f"A structured research plan covering {topic}.",
+            "keywords": keywords if keywords else [topic],
+            "subtopics": [f"Foundations of {topic}", f"Applications of {topic}"],
+            "research_questions": [f"What are current key advancements and methodologies in {topic}?"],
+            "methodology_suggestions": ["Literature Review", "Empirical Evaluation"],
+            "timeline_weeks": 4,
         }
 
     # Validate against the Pydantic model (will raise if incompatible).

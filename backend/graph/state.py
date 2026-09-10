@@ -18,10 +18,12 @@ class ResearchState(TypedDict, total=False):
     papers: Optional[List[Dict[str, Any]]]
     selected_papers: Optional[List[Dict[str, Any]]]
     analyzed_papers: Optional[List[Dict[str, Any]]]
+    analysis_results: Optional[List[Dict[str, Any]]]
+    gaps: Optional[List[Dict[str, Any]]]
     research_gaps: Optional[List[Dict[str, Any]]]
     critique: Optional[Dict[str, Any]]
     research_questions: Optional[List[str]]
-    roadmap: Optional[Dict[str, Any]],
+    roadmap: Optional[Dict[str, Any]]
     planner_output: Optional[Dict[str, Any]]
 
     # Misc

@@ -29,3 +29,9 @@ class ResearchResponse(BaseModel):
     papers: Optional[List[Dict[str, Any]]] = Field(
         None, description="Research papers discovered by the Discovery Agent"
     )
+    analysis_results: Optional[List[Dict[str, Any]]] = Field(
+        None, description="Structured analysis of discovered papers produced by the Analysis Agent"
+    )
+    gaps: Optional[List[Dict[str, Any]]] = Field(
+        None, description="Identified research gaps produced by the Gap Analysis Agent"
+    )

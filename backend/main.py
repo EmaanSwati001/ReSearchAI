@@ -5,6 +5,7 @@ Provides minimal health and research endpoints.
 """
 
 from fastapi import FastAPI, HTTPException
+import backend.config  # loads .env variables
 from backend.schemas.research import ResearchRequest, ResearchResponse
 from backend.graph.research_graph import get_research_graph
 
@@ -39,4 +40,6 @@ def start_research(request: ResearchRequest):
         status=result.get("status", "success"),
         planner_output=result.get("planner_output"),
         papers=result.get("papers"),
+        analysis_results=result.get("analysis_results"),
+        gaps=result.get("gaps"),
     )

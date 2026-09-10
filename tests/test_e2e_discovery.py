@@ -98,9 +98,9 @@ def main():
     print(f"  Errors:                {len(errors)}")
 
     if len(papers) > 0:
-        print("\n  ✅ END-TO-END TEST PASSED")
+        print("\n  [OK] END-TO-END TEST PASSED")
     else:
-        print("\n  ⚠️  No papers found (APIs may be rate-limited or unreachable)")
+        print("\n  [!!] No papers found (APIs may be rate-limited or unreachable)")
 
     return len(papers) > 0
 

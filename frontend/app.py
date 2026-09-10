@@ -124,3 +124,62 @@ if st.button("Start Research"):
                 st.markdown("")  # Spacing between papers
         else:
             st.info("No papers were discovered. The search APIs may be unavailable.")
+
+        # --- Paper Analysis (Phase 4) ---
+        analysis_results = data.get("analysis_results", [])
+        if analysis_results:
+            st.markdown("---")
+            st.header(f"📊 Paper Analysis ({len(analysis_results)})")
+
+            for i, analysis in enumerate(analysis_results, 1):
+                paper_title = analysis.get("title") or f"Paper #{i}"
+                with st.expander(f"📑 {i}. {paper_title}", expanded=(i <= 2)):
+                    st.markdown(f"**🎯 Research Problem / Objective:**\n{analysis.get('research_problem', 'N/A')}")
+                    st.markdown(f"**⚙️ Methodology:**\n{analysis.get('methodology', 'N/A')}")
+                    st.markdown(f"**💾 Dataset / Data:**\n{analysis.get('datasets', 'N/A')}")
+
+                    findings = analysis.get("key_findings", [])
+                    st.markdown("**🔍 Key Findings:**")
+                    if isinstance(findings, list) and findings:
+                        for item in findings:
+                            st.markdown(f"- {item}")
+                    elif isinstance(findings, str) and findings:
+                        st.markdown(findings)
+                    else:
+                        st.markdown("Not specified in the available abstract.")
+
+                    st.markdown(f"**⚠️ Limitations:**\n{analysis.get('limitations', 'N/A')}")
+                    st.markdown(f"**🚀 Future Work:**\n{analysis.get('future_work', 'N/A')}")
+
+        # --- Research Gaps (Phase 5) ---
+        gaps = data.get("gaps", [])
+        if gaps:
+            st.markdown("---")
+            st.header(f"🔎 Research Gaps ({len(gaps)})")
+
+            for i, gap_item in enumerate(gaps, 1):
+                conf = str(gap_item.get("confidence", "Medium")).strip().capitalize()
+                if conf == "High":
+                    badge = "🟢 High Confidence"
+                elif conf == "Low":
+                    badge = "🔴 Low Confidence"
+                else:
+                    badge = "🟡 Medium Confidence"
+
+                gap_type = gap_item.get("gap_type", "General Gap")
+                gap_text = gap_item.get("gap", "Unnamed Gap")
+
+                with st.expander(f"🔬 {i}. {gap_text} [{badge}]", expanded=(i <= 3)):
+                    st.markdown(f"**🏷️ Gap Type:** `{gap_type}` | **Confidence:** {badge}")
+                    st.markdown(f"**📌 Research Gap:**\n{gap_text}")
+                    st.markdown(f"**🧾 Evidence:**\n{gap_item.get('evidence', 'N/A')}")
+
+                    papers_list = gap_item.get("supporting_papers", [])
+                    if papers_list:
+                        st.markdown("**📚 Supporting Papers:**")
+                        for sp in papers_list:
+                            st.markdown(f"- {sp}")
+
+                    st.markdown(f"**💡 Research Opportunity:**\n{gap_item.get('research_opportunity', 'N/A')}")
+
+

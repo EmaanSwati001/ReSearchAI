@@ -9,6 +9,7 @@ for relevant research papers.
 
 from typing import Dict, Any, List
 
+import backend.config  # ensure .env is loaded
 from backend.schemas.paper import Paper
 from backend.tools import semantic_scholar, arxiv
 
