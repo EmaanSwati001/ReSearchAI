@@ -42,4 +42,6 @@ def start_research(request: ResearchRequest):
         papers=result.get("papers"),
         analysis_results=result.get("analysis_results"),
         gaps=result.get("gaps"),
+        critic_results=result.get("critic_results"),
+        roadmap=result.get("roadmap"),
     )

@@ -21,6 +21,7 @@ class ResearchState(TypedDict, total=False):
     analysis_results: Optional[List[Dict[str, Any]]]
     gaps: Optional[List[Dict[str, Any]]]
     research_gaps: Optional[List[Dict[str, Any]]]
+    critic_results: Optional[List[Dict[str, Any]]]
     critique: Optional[Dict[str, Any]]
     research_questions: Optional[List[str]]
     roadmap: Optional[Dict[str, Any]]

@@ -32,6 +32,9 @@ class PaperAnalysis(BaseModel):
     future_work: str = Field(
         ..., description="Suggested future directions, or 'Not specified in the available abstract.'"
     )
+    evidence_sources: Optional[List[dict]] = Field(
+        default_factory=list, description="List of source evidence used by the RAG system."
+    )
 
     @field_validator("key_findings", mode="before")
     @classmethod

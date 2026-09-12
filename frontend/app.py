@@ -130,6 +130,7 @@ if st.button("Start Research"):
         if analysis_results:
             st.markdown("---")
             st.header(f"📊 Paper Analysis ({len(analysis_results)})")
+            st.caption("Analysis is grounded in retrieved evidence from the discovered research papers.")
 
             for i, analysis in enumerate(analysis_results, 1):
                 paper_title = analysis.get("title") or f"Paper #{i}"
@@ -150,6 +151,22 @@ if st.button("Start Research"):
 
                     st.markdown(f"**⚠️ Limitations:**\n{analysis.get('limitations', 'N/A')}")
                     st.markdown(f"**🚀 Future Work:**\n{analysis.get('future_work', 'N/A')}")
+                    
+                    evidence_sources = analysis.get("evidence_sources", [])
+                    if evidence_sources:
+                        st.markdown("---")
+                        st.markdown("📚 **Evidence Used**")
+                        st.caption(f"Based on {len(evidence_sources)} retrieved chunk(s).")
+                        
+                        unique_sources = {}
+                        for chunk in evidence_sources:
+                            source_url = chunk.get("url") or "#"
+                            source_title = chunk.get("title") or "Unknown Paper"
+                            src_type = chunk.get("source", "Unknown")
+                            unique_sources[source_url] = (source_title, src_type)
+                            
+                        for url, (title, src_type) in unique_sources.items():
+                            st.markdown(f"- [{title}]({url}) ({src_type})")
 
         # --- Research Gaps (Phase 5) ---
         gaps = data.get("gaps", [])
@@ -182,4 +199,80 @@ if st.button("Start Research"):
 
                     st.markdown(f"**💡 Research Opportunity:**\n{gap_item.get('research_opportunity', 'N/A')}")
 
+        # --- Research Critic (Phase 7) ---
+        critic_results = data.get("critic_results", [])
+        if critic_results:
+            st.markdown("---")
+            st.header(f"🧠 Research Critic ({len(critic_results)})")
+            
+            for i, crit in enumerate(critic_results, 1):
+                verdict = crit.get("verdict", "Unknown")
+                if "Partially" in verdict:
+                    verdict_icon = "⚠️"
+                elif "Weak" in verdict or "Needs" in verdict:
+                    verdict_icon = "❌"
+                else:
+                    verdict_icon = "✅"
+                    
+                strength = crit.get("evidence_strength", "Unknown")
+                if strength == "High":
+                    str_icon = "💪"
+                elif strength == "Medium":
+                    str_icon = "⚖️"
+                else:
+                    str_icon = "📉"
+                
+                with st.expander(f"🧑‍🏫 Critic Evaluation #{i} - {verdict_icon} {verdict}", expanded=True):
+                    st.markdown(f"**🔎 Research Gap:**\n{crit.get('gap', 'N/A')}")
+                    st.markdown(f"**{verdict_icon} Verdict:** {verdict}")
+                    st.markdown(f"**{str_icon} Evidence Strength:** {strength}")
+                    st.markdown(f"**🧠 Reasoning:**\n{crit.get('reasoning', 'N/A')}")
+                    st.markdown(f"**⚠️ Concerns:**\n{crit.get('concerns', 'N/A')}")
+                    st.markdown(f"**💡 Recommendation:**\n{crit.get('recommendation', 'N/A')}")
 
+        # --- Research Roadmap (Phase 8) ---
+        roadmap = data.get("roadmap", {})
+        if roadmap:
+            st.markdown("---")
+            st.header("🗺️ Research Roadmap")
+            
+            st.subheader("### Research Direction")
+            st.write(roadmap.get("research_direction", "N/A"))
+            
+            st.subheader("### Objective")
+            st.write(roadmap.get("objective", "N/A"))
+            
+            st.subheader("### Research Questions")
+            for rq in roadmap.get("research_questions", []):
+                st.write(f"- {rq}")
+                
+            st.subheader("### Methodology")
+            for i, m in enumerate(roadmap.get("methodology", []), 1):
+                st.write(f"{i}. {m}")
+                
+            st.subheader("### Data Requirements")
+            for dr in roadmap.get("data_requirements", []):
+                st.write(f"- {dr}")
+                
+            st.subheader("### Implementation Steps")
+            for i, step in enumerate(roadmap.get("implementation_steps", []), 1):
+                st.write(f"{i}. {step}")
+                
+            st.subheader("### Evaluation Metrics")
+            for em in roadmap.get("evaluation_metrics", []):
+                st.write(f"- {em}")
+                
+            st.subheader("### Expected Challenges")
+            for ec in roadmap.get("expected_challenges", []):
+                st.write(f"- {ec}")
+                
+            st.subheader("### Expected Outcomes")
+            for eo in roadmap.get("expected_outcomes", []):
+                st.write(f"- {eo}")
+                
+            st.subheader("### Validation Steps")
+            for vs in roadmap.get("validation_steps", []):
+                st.write(f"- {vs}")
+                
+            st.subheader("### Suggested Timeline")
+            st.write(f"{roadmap.get('timeline_weeks', 'N/A')} weeks")

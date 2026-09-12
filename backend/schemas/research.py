@@ -35,3 +35,9 @@ class ResearchResponse(BaseModel):
     gaps: Optional[List[Dict[str, Any]]] = Field(
         None, description="Identified research gaps produced by the Gap Analysis Agent"
     )
+    critic_results: Optional[List[Dict[str, Any]]] = Field(
+        None, description="Critical evaluation of gaps produced by the Critic Agent"
+    )
+    roadmap: Optional[Dict[str, Any]] = Field(
+        None, description="Actionable research roadmap produced by the Roadmap Agent"
+    )
