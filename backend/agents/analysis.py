@@ -138,7 +138,7 @@ def run(state: Dict[str, Any]) -> Dict[str, Any]:
         return state
 
     api_key = os.getenv("GROQ_API_KEY")
-    model = os.getenv("GROQ_MODEL", "llama3-8b-8192")  # Using a faster default model if not set
+    model = os.getenv("GROQ_MODEL", "qwen/qwen3.8-27b")
 
     analysis_results: List[Dict[str, Any]] = []
 
@@ -176,10 +176,10 @@ def run(state: Dict[str, Any]) -> Dict[str, Any]:
         # It's better to index just this paper's content for its specific analysis, or just trust the LLM.
         # Let's index just this paper for speed and accuracy of single-paper analysis.
         
-        local_vector_store = VectorStore()
+        vector_store.clear()
         chunks = chunk_text(text_content, paper)
-        local_vector_store.add_chunks(chunks)
-        local_retriever = Retriever(local_vector_store)
+        vector_store.add_chunks(chunks)
+        local_retriever = Retriever(vector_store)
         
         # 3. Generate relevant analysis queries
         query = "What is the core research problem, methodology, datasets used, key findings, limitations, and future work?"

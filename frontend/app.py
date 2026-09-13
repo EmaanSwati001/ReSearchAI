@@ -34,7 +34,7 @@ if st.button("Start Research"):
         with st.spinner("Running research pipeline..."):
             try:
                 response = requests.post(
-                    "http://localhost:8000/research", json=payload, timeout=60
+                    "http://localhost:8000/research", json=payload, timeout=120
                 )
                 response.raise_for_status()
                 data: Dict = response.json()
