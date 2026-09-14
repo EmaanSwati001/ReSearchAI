@@ -81,35 +81,43 @@ def _call_groq_analysis(model: str, api_key: str, paper: Dict[str, Any], evidenc
         "max_tokens": 1000,
     }
 
-    try:
-        response = requests.post(url, headers=headers, json=payload, timeout=30)
-        response.raise_for_status()
-        data = response.json()
-        content = data["choices"][0]["message"]["content"]
+    for attempt in range(4):
+        try:
+            response = requests.post(url, headers=headers, json=payload, timeout=30)
+            if response.status_code == 429:
+                sleep_time = 3 * (attempt + 1)
+                print(f"[Analysis] Groq 429 rate limit hit for '{title}'. Retrying in {sleep_time}s...")
+                time.sleep(sleep_time)
+                continue
+            response.raise_for_status()
+            data = response.json()
+            content = data["choices"][0]["message"]["content"]
 
-        cleaned = content.strip()
-        if cleaned.startswith("```"):
-            lines = cleaned.splitlines()
-            if lines[0].startswith("```"):
-                lines = lines[1:]
-            if lines and lines[-1].startswith("```"):
-                lines = lines[:-1]
-            cleaned = "\n".join(lines).strip()
+            cleaned = content.strip()
+            if cleaned.startswith("```"):
+                lines = cleaned.splitlines()
+                if lines[0].startswith("```"):
+                    lines = lines[1:]
+                if lines and lines[-1].startswith("```"):
+                    lines = lines[:-1]
+                cleaned = "\n".join(lines).strip()
 
-        parsed = json.loads(cleaned)
+            parsed = json.loads(cleaned)
 
-        if not parsed.get("paper_id"):
-            parsed["paper_id"] = paper_id
-        if not parsed.get("title"):
-            parsed["title"] = title
+            if not parsed.get("paper_id"):
+                parsed["paper_id"] = paper_id
+            if not parsed.get("title"):
+                parsed["title"] = title
 
-        # Attach evidence sources
-        parsed["evidence_sources"] = evidence_chunks
+            # Attach evidence sources
+            parsed["evidence_sources"] = evidence_chunks
 
-        return parsed
-    except Exception as e:
-        print(f"[Analysis] Groq analysis error for paper '{title}': {e}")
-        return None
+            return parsed
+        except Exception as e:
+            if attempt == 3:
+                print(f"[Analysis] Groq analysis error for paper '{title}': {e}")
+                return None
+            time.sleep(2)
 
 
 def _create_fallback_analysis(paper: Dict[str, Any], reason: str = "LLM analysis unavailable") -> Dict[str, Any]:

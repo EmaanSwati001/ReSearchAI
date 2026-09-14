@@ -15,7 +15,7 @@ from typing import List
 from backend.schemas.paper import Paper
 
 # API configuration
-SEARCH_URL = "http://export.arxiv.org/api/query"
+SEARCH_URL = "https://export.arxiv.org/api/query"
 
 # Atom XML namespace used by arXiv
 ATOM_NS = {"atom": "http://www.w3.org/2005/Atom"}
@@ -25,10 +25,10 @@ def _build_query(keywords: List[str]) -> str:
     """Build an arXiv search query from a list of keywords.
 
     Joins keywords with AND so that results match all terms.
-    Example: ["machine learning", "medical"] -> 'all:"machine learning"+AND+all:"medical"'
+    Example: ["machine learning", "medical"] -> 'all:"machine learning" AND all:"medical"'
     """
     parts = [f'all:"{kw}"' for kw in keywords]
-    return "+AND+".join(parts)
+    return " AND ".join(parts)
 
 
 def search_papers(query: str, limit: int = 10) -> List[Paper]:
@@ -41,6 +41,9 @@ def search_papers(query: str, limit: int = 10) -> List[Paper]:
     Returns:
         List of Paper objects. Returns empty list if the API fails.
     """
+    headers = {
+        "User-Agent": "ReSearchAI/1.0 (mailto:researcher@example.com)"
+    }
     params = {
         "search_query": query,
         "start": 0,
@@ -50,12 +53,12 @@ def search_papers(query: str, limit: int = 10) -> List[Paper]:
     }
 
     try:
-        response = requests.get(SEARCH_URL, params=params, timeout=15)
+        response = requests.get(SEARCH_URL, headers=headers, params=params, timeout=15)
         response.raise_for_status()
         xml_text = response.text
     except Exception as e:
         print(f"[arXiv] API request failed: {e}")
-        raise
+        return []
 
     # Parse the Atom XML response
     root = ET.fromstring(xml_text)

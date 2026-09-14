@@ -87,31 +87,39 @@ def _call_groq_critic(model: str, api_key: str, gap: Dict[str, Any], analysis_re
         "max_tokens": 1000,
     }
 
-    try:
-        response = requests.post(url, headers=headers, json=payload, timeout=30)
-        response.raise_for_status()
-        data = response.json()
-        content = data["choices"][0]["message"]["content"]
+    for attempt in range(4):
+        try:
+            response = requests.post(url, headers=headers, json=payload, timeout=30)
+            if response.status_code == 429:
+                sleep_time = 3 * (attempt + 1)
+                print(f"[Critic] Groq 429 rate limit hit. Retrying in {sleep_time}s...")
+                time.sleep(sleep_time)
+                continue
+            response.raise_for_status()
+            data = response.json()
+            content = data["choices"][0]["message"]["content"]
 
-        cleaned = content.strip()
-        if cleaned.startswith("```"):
-            lines = cleaned.splitlines()
-            if lines[0].startswith("```"):
-                lines = lines[1:]
-            if lines and lines[-1].startswith("```"):
-                lines = lines[:-1]
-            cleaned = "\n".join(lines).strip()
+            cleaned = content.strip()
+            if cleaned.startswith("```"):
+                lines = cleaned.splitlines()
+                if lines[0].startswith("```"):
+                    lines = lines[1:]
+                if lines and lines[-1].startswith("```"):
+                    lines = lines[:-1]
+                cleaned = "\n".join(lines).strip()
 
-        parsed = json.loads(cleaned)
-        
-        # Ensure the gap text is preserved if the LLM hallucinated it
-        if not parsed.get("gap") or parsed.get("gap") == "string":
-            parsed["gap"] = gap.get("gap", "Unknown Gap")
+            parsed = json.loads(cleaned)
             
-        return parsed
-    except Exception as e:
-        print(f"[Critic] Groq critic error: {e}")
-        return None
+            # Ensure the gap text is preserved if the LLM hallucinated it
+            if not parsed.get("gap") or parsed.get("gap") == "string":
+                parsed["gap"] = gap.get("gap", "Unknown Gap")
+                
+            return parsed
+        except Exception as e:
+            if attempt == 3:
+                print(f"[Critic] Groq critic error: {e}")
+                return None
+            time.sleep(2)
 
 def _create_fallback_critic(gap: Dict[str, Any], reason: str) -> Dict[str, Any]:
     """Create a fallback critic result when API fails."""

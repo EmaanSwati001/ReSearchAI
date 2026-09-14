@@ -4,6 +4,7 @@
 Provides minimal health and research endpoints.
 """
 
+import traceback
 from fastapi import FastAPI, HTTPException
 import backend.config  # loads .env variables
 from backend.schemas.research import ResearchRequest, ResearchResponse
@@ -33,6 +34,7 @@ def start_research(request: ResearchRequest):
     try:
         result = graph.invoke(initial_state)
     except Exception as exc:
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(exc))
 
     # Build the response from the graph result.
@@ -45,3 +47,4 @@ def start_research(request: ResearchRequest):
         critic_results=result.get("critic_results"),
         roadmap=result.get("roadmap"),
     )
+

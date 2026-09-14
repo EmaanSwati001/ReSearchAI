@@ -39,6 +39,7 @@ class VectorStore:
         for i, idx in enumerate(indices[0]):
             if idx != -1:
                 results.append((self.chunks_metadata[idx], float(distances[0][i])))
+        return results
                 
     def clear(self):
         """Clear the index and metadata without reloading the model."""

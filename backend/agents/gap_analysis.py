@@ -93,30 +93,39 @@ def _call_groq_gap_analysis(model: str, api_key: str, compact_papers: List[Dict[
         "max_tokens": 1500,
     }
 
-    try:
-        response = requests.post(url, headers=headers, json=payload, timeout=45)
-        response.raise_for_status()
-        data = response.json()
-        content = data["choices"][0]["message"]["content"]
+    import time
+    for attempt in range(4):
+        try:
+            response = requests.post(url, headers=headers, json=payload, timeout=45)
+            if response.status_code == 429:
+                sleep_time = 3 * (attempt + 1)
+                print(f"[GapAnalysis] Groq 429 rate limit hit. Retrying in {sleep_time}s...")
+                time.sleep(sleep_time)
+                continue
+            response.raise_for_status()
+            data = response.json()
+            content = data["choices"][0]["message"]["content"]
 
-        cleaned = content.strip()
-        if cleaned.startswith("```"):
-            lines = cleaned.splitlines()
-            if lines[0].startswith("```"):
-                lines = lines[1:]
-            if lines and lines[-1].startswith("```"):
-                lines = lines[:-1]
-            cleaned = "\n".join(lines).strip()
+            cleaned = content.strip()
+            if cleaned.startswith("```"):
+                lines = cleaned.splitlines()
+                if lines[0].startswith("```"):
+                    lines = lines[1:]
+                if lines and lines[-1].startswith("```"):
+                    lines = lines[:-1]
+                cleaned = "\n".join(lines).strip()
 
-        parsed = json.loads(cleaned)
-        if isinstance(parsed, dict) and "gaps" in parsed:
-            return parsed["gaps"]
-        if isinstance(parsed, list):
-            return parsed
-        return None
-    except Exception as e:
-        print(f"[GapAnalysis] Groq gap analysis error: {e}")
-        return None
+            parsed = json.loads(cleaned)
+            if isinstance(parsed, dict) and "gaps" in parsed:
+                return parsed["gaps"]
+            if isinstance(parsed, list):
+                return parsed
+            return None
+        except Exception as e:
+            if attempt == 3:
+                print(f"[GapAnalysis] Groq gap analysis error: {e}")
+                return None
+            time.sleep(2)
 
 
 def run(state: Dict[str, Any]) -> Dict[str, Any]:
