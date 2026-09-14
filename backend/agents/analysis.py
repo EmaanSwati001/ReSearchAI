@@ -170,7 +170,7 @@ def run(state: Dict[str, Any]) -> Dict[str, Any]:
     vector_store = VectorStore()
     retriever = Retriever(vector_store)
 
-    for i, paper in enumerate(papers[:5]): # Process up to 5 papers to avoid rate limits/time limits in demo
+    for i, paper in enumerate(papers[:3]): # Process top 3 papers to optimize execution speed
         if i > 0:
             time.sleep(0.5)
             

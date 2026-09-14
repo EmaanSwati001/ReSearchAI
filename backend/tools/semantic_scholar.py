@@ -42,12 +42,12 @@ def search_papers(query: str, limit: int = 10) -> List[Paper]:
     }
 
     try:
-        response = requests.get(SEARCH_URL, headers=headers, params=params, timeout=15)
+        response = requests.get(SEARCH_URL, headers=headers, params=params, timeout=8)
         # If API key returned 429 or 403, retry without API key
         if response.status_code in (429, 403) and "x-api-key" in headers:
             print(f"[Semantic Scholar] API key returned {response.status_code}. Retrying without API key...")
             headers.pop("x-api-key")
-            response = requests.get(SEARCH_URL, headers=headers, params=params, timeout=15)
+            response = requests.get(SEARCH_URL, headers=headers, params=params, timeout=8)
         
         response.raise_for_status()
         data = response.json()

@@ -53,7 +53,7 @@ def search_papers(query: str, limit: int = 10) -> List[Paper]:
     }
 
     try:
-        response = requests.get(SEARCH_URL, headers=headers, params=params, timeout=15)
+        response = requests.get(SEARCH_URL, headers=headers, params=params, timeout=8)
         response.raise_for_status()
         xml_text = response.text
     except Exception as e:
