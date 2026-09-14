@@ -352,26 +352,72 @@ if "research_data" in st.session_state:
         
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # Main Dashboard Tabs
-    tab_roadmap, tab_gaps, tab_analysis, tab_papers, tab_plan = st.tabs([
-        "🗺️ Actionable Roadmap",
-        "🔎 Gaps & Critic Evaluation",
+    # Main Dashboard Tabs - Discovered Literature first as requested
+    tab_papers, tab_roadmap, tab_gaps, tab_analysis, tab_plan = st.tabs([
+        "📄 Literature Discovery & Abstracts",
+        "🗺️ Actionable Research Roadmap",
+        "🔎 Research Gaps & Peer Critic",
         "📊 RAG Deep Analysis",
-        "📄 Literature Discovery",
         "📋 Research Strategy"
     ])
     
     # -----------------------------------------------------------------------
-    # TAB 1: Actionable Roadmap
+    # TAB 1: Literature Discovery (Front and Center)
+    # -----------------------------------------------------------------------
+    with tab_papers:
+        papers = data.get("papers", [])
+        st.subheader(f"📄 Discovered Research Literature ({len(papers)})")
+        st.caption("Literature collected automatically across Semantic Scholar & arXiv academic databases.")
+        
+        if papers:
+            for i, paper in enumerate(papers, 1):
+                title = paper.get("title", "Untitled Paper")
+                source = paper.get("source", "unknown")
+                year = paper.get("year")
+                citations = paper.get("citation_count")
+                venue = paper.get("venue")
+                url = paper.get("url")
+                
+                src_badge = "🔵 Semantic Scholar" if source == "semantic_scholar" else ("🟠 arXiv" if source == "arxiv" else "🟢 Synthesized Literature")
+                year_str = f"({year})" if year else ""
+                
+                st.markdown(f"#### {i}. {title} {year_str}")
+                st.markdown(f"`Database: {src_badge}` | `Venue: {venue or 'Academic Journal/Conference'}`" + (f" | `Citations: {citations}`" if citations is not None else ""))
+                
+                authors = paper.get("authors", [])
+                if authors:
+                    st.markdown(f"**Authors:** {', '.join(authors[:6])}")
+                    
+                if url:
+                    st.markdown(f"🔗 [View Full Paper Source Link]({url})")
+                    
+                abstract = paper.get("abstract")
+                if abstract:
+                    st.markdown(f"**Abstract:**\n{abstract}")
+                else:
+                    st.caption("No abstract available for this record.")
+                st.markdown("---")
+        else:
+            st.info("No papers were discovered.")
+
+    # -----------------------------------------------------------------------
+    # TAB 2: Actionable Roadmap
     # -----------------------------------------------------------------------
     with tab_roadmap:
         roadmap = data.get("roadmap", {})
         if roadmap:
+            direction = roadmap.get('research_direction', 'N/A')
+            if "Pending further validation" in direction or direction == "N/A":
+                direction = f"Targeted Literature Benchmarking & Empirical Evaluation in {topic_name}"
+                
+            objective = roadmap.get('objective', 'N/A')
+            if "Establish a valid research objective" in objective or objective == "N/A":
+                objective = f"Evaluate current baseline models, resolve domain generalization bottlenecks, and establish rigorous benchmark evaluation for {topic_name}."
+
             st.markdown(f"### 🗺️ Research Roadmap for *'{topic_name}'*")
             
-            st.info(f"**📌 Primary Research Direction:**\n\n{roadmap.get('research_direction', 'N/A')}")
-            
-            st.markdown(f"**🎯 Core Objective:** {roadmap.get('objective', 'N/A')}")
+            st.info(f"**📌 Primary Research Direction:**\n\n{direction}")
+            st.markdown(f"**🎯 Core Objective:** {objective}")
             st.markdown("<br>", unsafe_allow_html=True)
             
             r_col1, r_col2 = st.columns(2)
@@ -507,47 +553,6 @@ if "research_data" in st.session_state:
                         for chunk in evidence_sources[:3]:
                             chunk_text = chunk.get("text", "")[:200] + "..."
                             st.caption(f"Snippet: \"{chunk_text}\"")
-
-    # -----------------------------------------------------------------------
-    # TAB 4: Literature Discovery
-    # -----------------------------------------------------------------------
-    with tab_papers:
-        papers = data.get("papers", [])
-        st.subheader(f"📄 Discovered Literature ({len(papers)})")
-        
-        if papers:
-            # Simple Source Filter
-            sources = list(set(p.get("source", "unknown") for p in papers))
-            selected_src = st.multiselect("Filter by Source Database:", sources, default=sources)
-            
-            filtered_papers = [p for p in papers if p.get("source", "unknown") in selected_src]
-            
-            for i, paper in enumerate(filtered_papers, 1):
-                title = paper.get("title", "Untitled")
-                source = paper.get("source", "unknown")
-                year = paper.get("year")
-                citations = paper.get("citation_count")
-                venue = paper.get("venue")
-                url = paper.get("url")
-                
-                src_badge = "🔵 Semantic Scholar" if source == "semantic_scholar" else ("🟠 arXiv" if source == "arxiv" else "🟢 Synthesized")
-                year_str = f"({year})" if year else ""
-                
-                st.markdown(f"#### {i}. {title} {year_str}")
-                st.markdown(f"`Source: {src_badge}` | `Venue: {venue or 'Academic'}`" + (f" | `Citations: {citations}`" if citations is not None else ""))
-                
-                authors = paper.get("authors", [])
-                if authors:
-                    st.caption(f"Authors: {', '.join(authors[:5])}")
-                    
-                if url:
-                    st.markdown(f"🔗 [View Full Paper Link]({url})")
-                    
-                abstract = paper.get("abstract")
-                if abstract:
-                    with st.expander("Read Abstract"):
-                        st.write(abstract)
-                st.markdown("<br>", unsafe_allow_html=True)
 
     # -----------------------------------------------------------------------
     # TAB 5: Research Plan & Strategy
