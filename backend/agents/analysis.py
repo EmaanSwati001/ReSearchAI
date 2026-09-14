@@ -114,6 +114,10 @@ def _call_groq_analysis(model: str, api_key: str, paper: Dict[str, Any], evidenc
 
             return parsed
         except Exception as e:
+            # If server returned non-429 error (e.g. 500), do not retry
+            if 'response' in locals() and response is not None and response.status_code != 429:
+                print(f"[Analysis] Groq analysis error for paper '{title}': {e}")
+                return None
             if attempt == 3:
                 print(f"[Analysis] Groq analysis error for paper '{title}': {e}")
                 return None

@@ -206,8 +206,8 @@ def run(state: Dict[str, Any]) -> Dict[str, Any]:
     unique_papers = _deduplicate_papers(all_papers)
     print(f"[Discovery] {len(unique_papers)} unique papers after deduplication")
 
-    # If APIs return no papers (due to API rate limits or network issues), generate grounded fallback papers
-    if not unique_papers:
+    # If APIs return no papers and no API errors occurred (e.g. rate limits or zero results), generate grounded fallback papers
+    if not unique_papers and not errors:
         print("[Discovery] Search APIs returned 0 papers. Invoking fallback paper discovery...")
         unique_papers = _generate_fallback_papers(planner_output)
 

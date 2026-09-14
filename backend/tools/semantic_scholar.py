@@ -53,7 +53,7 @@ def search_papers(query: str, limit: int = 10) -> List[Paper]:
         data = response.json()
     except Exception as e:
         print(f"[Semantic Scholar] API request failed: {e}")
-        return []
+        raise
 
     raw_papers = data.get("data", [])
     papers: List[Paper] = []

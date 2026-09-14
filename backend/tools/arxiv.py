@@ -25,10 +25,10 @@ def _build_query(keywords: List[str]) -> str:
     """Build an arXiv search query from a list of keywords.
 
     Joins keywords with AND so that results match all terms.
-    Example: ["machine learning", "medical"] -> 'all:"machine learning" AND all:"medical"'
+    Example: ["machine learning", "medical"] -> 'all:"machine learning"+AND+all:"medical"'
     """
     parts = [f'all:"{kw}"' for kw in keywords]
-    return " AND ".join(parts)
+    return "+AND+".join(parts)
 
 
 def search_papers(query: str, limit: int = 10) -> List[Paper]:
@@ -58,7 +58,7 @@ def search_papers(query: str, limit: int = 10) -> List[Paper]:
         xml_text = response.text
     except Exception as e:
         print(f"[arXiv] API request failed: {e}")
-        return []
+        raise
 
     # Parse the Atom XML response
     root = ET.fromstring(xml_text)

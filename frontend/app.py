@@ -234,45 +234,51 @@ if st.button("Start Research"):
         roadmap = data.get("roadmap", {})
         if roadmap:
             st.markdown("---")
-            st.header("🗺️ Research Roadmap")
+            st.header("🗺️ Actionable Research Roadmap")
             
-            st.subheader("### Research Direction")
-            st.write(roadmap.get("research_direction", "N/A"))
+            # Highlight direction & timeline
+            st.info(f"**📌 Research Direction:** {roadmap.get('research_direction', 'N/A')}")
             
-            st.subheader("### Objective")
+            timeline_weeks = roadmap.get('timeline_weeks', 'N/A')
+            st.metric("⏱️ Suggested Timeline", f"{timeline_weeks} Weeks")
+            
+            st.subheader("🎯 Objective")
             st.write(roadmap.get("objective", "N/A"))
             
-            st.subheader("### Research Questions")
-            for rq in roadmap.get("research_questions", []):
-                st.write(f"- {rq}")
-                
-            st.subheader("### Methodology")
-            for i, m in enumerate(roadmap.get("methodology", []), 1):
-                st.write(f"{i}. {m}")
-                
-            st.subheader("### Data Requirements")
-            for dr in roadmap.get("data_requirements", []):
-                st.write(f"- {dr}")
-                
-            st.subheader("### Implementation Steps")
+            col1, col2 = st.columns(2)
+            with col1:
+                st.subheader("❓ Research Questions")
+                for rq in roadmap.get("research_questions", []):
+                    st.markdown(f"- {rq}")
+                    
+                st.subheader("🔬 Methodology")
+                for m in roadmap.get("methodology", []):
+                    clean_m = str(m).lstrip("0123456789. ")
+                    st.markdown(f"- {clean_m}")
+
+            with col2:
+                st.subheader("💾 Data Requirements")
+                for dr in roadmap.get("data_requirements", []):
+                    st.markdown(f"- {dr}")
+                    
+                st.subheader("📊 Evaluation Metrics")
+                for em in roadmap.get("evaluation_metrics", []):
+                    st.markdown(f"- {em}")
+
+            st.subheader("🚀 Implementation Plan")
             for i, step in enumerate(roadmap.get("implementation_steps", []), 1):
-                st.write(f"{i}. {step}")
+                clean_step = str(step).lstrip("0123456789. ")
+                st.markdown(f"**Step {i}:** {clean_step}")
                 
-            st.subheader("### Evaluation Metrics")
-            for em in roadmap.get("evaluation_metrics", []):
-                st.write(f"- {em}")
-                
-            st.subheader("### Expected Challenges")
-            for ec in roadmap.get("expected_challenges", []):
-                st.write(f"- {ec}")
-                
-            st.subheader("### Expected Outcomes")
-            for eo in roadmap.get("expected_outcomes", []):
-                st.write(f"- {eo}")
-                
-            st.subheader("### Validation Steps")
-            for vs in roadmap.get("validation_steps", []):
-                st.write(f"- {vs}")
-                
-            st.subheader("### Suggested Timeline")
-            st.write(f"{roadmap.get('timeline_weeks', 'N/A')} weeks")
+            with st.expander("🔍 Risk Assessment & Outcomes", expanded=True):
+                st.markdown(f"**⚠️ Expected Challenges:**")
+                for ec in roadmap.get("expected_challenges", []):
+                    st.markdown(f"- {ec}")
+                    
+                st.markdown(f"**🏆 Expected Outcomes:**")
+                for eo in roadmap.get("expected_outcomes", []):
+                    st.markdown(f"- {eo}")
+                    
+                st.markdown(f"**✅ Validation Steps:**")
+                for vs in roadmap.get("validation_steps", []):
+                    st.markdown(f"- {vs}")

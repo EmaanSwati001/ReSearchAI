@@ -116,38 +116,23 @@ def _call_groq_roadmap(model: str, api_key: str, state: Dict[str, Any]) -> Optio
             time.sleep(2)
 
 def _create_fallback_roadmap(state: Dict[str, Any], reason: str) -> Dict[str, Any]:
-    """Create a fallback roadmap grounded in the user's topic when data is missing."""
-    topic = state.get("user_topic", "Research Topic")
-    planner = state.get("planner_output", {})
-    title = planner.get("title", f"Research Plan: {topic}")
-    keywords = planner.get("keywords", [topic])
-    kw_str = ", ".join(keywords[:3]) if keywords else topic
-
+    """Create a fallback roadmap when API fails or data is missing."""
     return {
-        "research_direction": f"Empirical Evaluation & Methodological Advances in {topic}",
-        "objective": f"Address core computational and generalization limitations in {kw_str}.",
-        "research_questions": [
-            f"How do current state-of-the-art models perform under real-world domain shifts in {topic}?",
-            f"What specific architectural or data enhancements resolve current performance bottlenecks in {kw_str}?"
-        ],
-        "methodology": [
-            f"Systematic literature evaluation of {topic} benchmarks.",
-            "Ablation studies on core model components and dataset variations."
-        ],
-        "data_requirements": [
-            f"Standard open academic datasets for {topic}.",
-            "Custom validation subsets for robust evaluation."
-        ],
+        "research_direction": "Pending further validation.",
+        "objective": "Establish a valid research objective based on more literature.",
+        "research_questions": ["What is the specific limitation in current literature?"],
+        "methodology": ["Conduct an extensive systematic literature review."],
+        "data_requirements": ["Literature database access."],
         "implementation_steps": [
-            f"1. Establish baseline model environment for {topic}.",
-            "2. Implement proposed architectural modifications and training pipeline.",
-            "3. Conduct comprehensive cross-dataset evaluation and ablation analysis."
+            "1. Search additional academic databases.",
+            "2. Identify specific unaddressed gaps.",
+            "3. Formulate a strong hypothesis."
         ],
-        "evaluation_metrics": ["Accuracy/F1-Score", "Generalization Latency", "Ablation Accuracy Delta"],
-        "expected_challenges": [f"Data heterogeneity and computational requirements for {topic}."],
-        "expected_outcomes": [f"Novel methodological framework improving state-of-the-art performance in {topic}."],
-        "validation_steps": ["Cross-validation across diverse datasets", "Statistical significance testing"],
-        "timeline_weeks": 6
+        "evaluation_metrics": ["Number of relevant papers supporting the new gap."],
+        "expected_challenges": ["Finding high-quality, relevant data."],
+        "expected_outcomes": ["A validated, strong research gap."],
+        "validation_steps": ["Cross-reference multiple sources."],
+        "timeline_weeks": 4
     }
 
 def run(state: Dict[str, Any]) -> Dict[str, Any]:
@@ -169,6 +154,15 @@ def run(state: Dict[str, Any]) -> Dict[str, Any]:
     gaps = state.get("gaps", [])
     critic_results = state.get("critic_results", [])
     
+    if not gaps or not critic_results:
+        fallback = _create_fallback_roadmap(state, "Missing gaps or critic results")
+        try:
+            validated = RoadmapResult(**fallback)
+            state["roadmap"] = validated.model_dump()
+        except Exception:
+            state["roadmap"] = fallback
+        return state
+
     parsed_dict = _call_groq_roadmap(model, api_key, state)
     
     if parsed_dict is None:
