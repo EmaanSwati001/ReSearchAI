@@ -157,7 +157,7 @@ def run(state: Dict[str, Any]) -> Dict[str, Any]:
         state["critic_results"] = critic_results
         return state
 
-    for i, gap in enumerate(gaps):
+    for i, gap in enumerate(gaps[:2]): # Evaluate top 2 gaps to prevent rate limits
         if i > 0:
             time.sleep(0.5)
             

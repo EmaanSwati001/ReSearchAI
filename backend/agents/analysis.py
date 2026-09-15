@@ -170,7 +170,7 @@ def run(state: Dict[str, Any]) -> Dict[str, Any]:
     vector_store = VectorStore()
     retriever = Retriever(vector_store)
 
-    for i, paper in enumerate(papers[:3]): # Process top 3 papers to optimize execution speed
+    for i, paper in enumerate(papers[:2]): # Process top 2 papers for rapid RAG grounding without rate limits
         if i > 0:
             time.sleep(0.5)
             
