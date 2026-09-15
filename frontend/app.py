@@ -15,8 +15,11 @@ import streamlit as st
 import requests
 import json
 import time
+import os
 import concurrent.futures
 from typing import Dict, Any
+
+BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
 
 # ---------------------------------------------------------------------------
 # Page Configuration
@@ -479,7 +482,7 @@ if not results_ready:
             ]
             
             with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
-                future = executor.submit(requests.post, "http://localhost:8000/research", json=payload, timeout=300)
+                future = executor.submit(requests.post, f"{BACKEND_URL}/research", json=payload, timeout=300)
                 stage_idx = 0
                 start_time = time.time()
                 
