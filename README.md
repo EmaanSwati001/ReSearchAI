@@ -124,16 +124,49 @@ Access the Streamlit Dashboard at [**http://localhost:8501**](http://localhost:8
 
 ---
 
-## 🐳 Docker Deployment
+## 🔍 Observability & Tracing
 
-Run the entire application stack using Docker Compose:
+ReSearchAI provides end-to-end observability across the multi-agent pipeline:
+
+1. **Structured Application Logging**:
+   - Built-in Python standard logging with UTC timestamps, agent module names, and pipeline execution latencies in seconds.
+   - Logs request payloads, API retry backoffs (e.g. Groq 429 mitigation), and error stack traces.
+
+2. **LangSmith Tracing Integration**:
+   - Native integration with LangChain / LangSmith tracing.
+   - To enable full cloud tracing of agent thought graphs, add your keys to `.env`:
+     ```env
+     LANGCHAIN_TRACING_V2=true
+     LANGCHAIN_API_KEY=your_langsmith_api_key_here
+     LANGCHAIN_PROJECT=ReSearchAI
+     ```
+
+---
+
+## 🐳 Docker Deployment & Docker Hub
+
+### Run with Docker Compose (Recommended)
 
 ```bash
-docker-compose up --build
-```
+# 1. Copy environment template and add your GROQ_API_KEY
+cp .env.example .env
 
+# 2. Build and launch services
+docker compose up --build
+```
 - **Backend API**: `http://localhost:8000`
-- **Frontend UI**: `http://localhost:8501`
+- **Frontend Studio**: `http://localhost:8501`
+
+### Docker Hub Deployment (Optional)
+
+To publish and pull pre-built container images:
+```bash
+# Build & tag image
+docker build -t <your-dockerhub-username>/researchai:latest .
+
+# Push to Docker Hub
+docker push <your-dockerhub-username>/researchai:latest
+```
 
 ---
 
@@ -147,11 +180,11 @@ python -m pytest
 
 ---
 
-## 📜 Submission Deliverables Checklist
+## 📜 Capstone Submission Deliverables
 
-- [x] **Clean Codebase & Repo**: Structured FastAPI backend, LangGraph state graph, Streamlit UI.
-- [x] **56 Unit & Integration Tests Passing**: Run `python -m pytest`.
-- [x] **Docker Containerization**: `Dockerfile` & `docker-compose.yml` operational.
-- [x] **Detailed README**: Setup, architecture diagram (Mermaid), agent prompt design, and execution guide.
-- [ ] **Demo Video (2–5 mins)**: *(To be recorded by student showing problem, live demo & architecture)*.
-- [ ] **Live App URL / Docker Link**: Submitted via atomcamp portal.
+| Deliverable | Description | Location / Status |
+| :--- | :--- | :--- |
+| **1. GitHub Repo** | Clean code, modular structure, passing tests, and architecture documentation. | [GitHub Repository URL](https://github.com/) |
+| **2. Demo Video** | 2–5 minute walkthrough: Problem statement, live multi-agent demo, and technical retrospective. | [Demo Video Link (Google Drive / Loom / YouTube)]() |
+| **3. Live App / Docker** | Container steps (`docker compose up`) or Docker Hub image link. | `docker compose up --build` |
+
